@@ -34,6 +34,7 @@ interface StudyGroup {
   member_count?: number;
   is_member?: boolean;
   creator_name?: string;
+  user_role?: string;
 }
 
 export default function StudyGroups() {
@@ -108,7 +109,7 @@ export default function StudyGroups() {
         const groups = data.map(item => ({
           ...item.study_groups,
           member_count: item.study_groups?.study_group_members?.[0]?.count || 0,
-          my_role: item.role
+          user_role: item.role
         }));
         setMyGroups(groups);
       }
@@ -453,7 +454,7 @@ export default function StudyGroups() {
                     <div className="flex-1">
                       <CardTitle className="text-lg flex items-center">
                         {group.name}
-                        {group.my_role === 'admin' && (
+                        {group.user_role === 'admin' && (
                           <Crown className="h-4 w-4 ml-2 text-amber-500" />
                         )}
                       </CardTitle>
@@ -471,7 +472,7 @@ export default function StudyGroups() {
                       {group.member_count}/{group.max_members} members
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {group.my_role}
+                      {group.user_role}
                     </Badge>
                   </div>
                   

@@ -444,6 +444,60 @@ export type Database = {
           },
         ]
       }
+      notes: {
+        Row: {
+          content: string
+          course_id: string | null
+          created_at: string
+          id: string
+          is_bookmark: boolean | null
+          lesson_id: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_bookmark?: boolean | null
+          lesson_id?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_bookmark?: boolean | null
+          lesson_id?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null

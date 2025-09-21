@@ -260,7 +260,7 @@ function createGeometryAnimation(scene: THREE.Scene): THREE.Object3D[] {
   shapes.forEach(shape => {
     const material = new THREE.MeshPhongMaterial({ color: shape.color });
     const mesh = new THREE.Mesh(shape.geometry, material);
-    mesh.position.set(...shape.position);
+    mesh.position.set(shape.position[0], shape.position[1], shape.position[2]);
     mesh.castShadow = true;
     scene.add(mesh);
     objects.push(mesh);

@@ -11,6 +11,13 @@ import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import Course from "./pages/Course";
 import Lesson from "./pages/Lesson";
+import Forums from "./pages/Forums";
+import Leaderboard from "./pages/Leaderboard";
+import Library from "./pages/Library";
+import Profile from "./pages/Profile";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import VirtualClassroom from "./pages/VirtualClassroom";
+import StudyGroups from "./components/StudyGroups";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +50,41 @@ const App = () => (
             <Route path="/lesson/:id" element={
               <ProtectedRoute>
                 <Lesson />
+              </ProtectedRoute>
+            } />
+            <Route path="/forums" element={
+              <ProtectedRoute>
+                <Forums />
+              </ProtectedRoute>
+            } />
+            <Route path="/leaderboard" element={
+              <ProtectedRoute>
+                <Leaderboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/library" element={
+              <ProtectedRoute>
+                <Library />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/teacher-dashboard" element={
+              <ProtectedRoute>
+                <TeacherDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/virtual-classroom" element={
+              <ProtectedRoute>
+                <VirtualClassroom />
+              </ProtectedRoute>
+            } />
+            <Route path="/study-groups" element={
+              <ProtectedRoute>
+                <StudyGroups />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

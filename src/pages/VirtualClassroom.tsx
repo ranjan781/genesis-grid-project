@@ -79,8 +79,6 @@ export default function VirtualClassroom() {
         .from('virtual_sessions')
         .select(`
           *,
-          profiles!virtual_sessions_host_id_fkey(full_name),
-          classes(name),
           session_attendance(count)
         `)
         .gte('scheduled_start', new Date().toISOString())
@@ -89,8 +87,10 @@ export default function VirtualClassroom() {
       if (data) {
         const sessionsWithDetails = data.map(session => ({
           ...session,
-          host_name: session.profiles?.full_name || 'Unknown Host',
-          class_name: session.classes?.name || null,
+          session_type: session.session_type as 'live' | 'recorded',
+          status: session.status as 'scheduled' | 'in_progress' | 'completed' | 'cancelled',
+          host_name: 'Host User',
+          class_name: null,
           attendee_count: session.session_attendance?.[0]?.count || 0
         }));
         setSessions(sessionsWithDetails);
@@ -110,8 +110,6 @@ export default function VirtualClassroom() {
         .from('virtual_sessions')
         .select(`
           *,
-          profiles!virtual_sessions_host_id_fkey(full_name),
-          classes(name),
           session_attendance(count)
         `)
         .eq('host_id', user.id)
@@ -120,8 +118,10 @@ export default function VirtualClassroom() {
       if (data) {
         const sessionsWithDetails = data.map(session => ({
           ...session,
-          host_name: session.profiles?.full_name || 'Unknown Host',
-          class_name: session.classes?.name || null,
+          session_type: session.session_type as 'live' | 'recorded',
+          status: session.status as 'scheduled' | 'in_progress' | 'completed' | 'cancelled',
+          host_name: 'Host User',
+          class_name: null,
           attendee_count: session.session_attendance?.[0]?.count || 0
         }));
         setMySessions(sessionsWithDetails);

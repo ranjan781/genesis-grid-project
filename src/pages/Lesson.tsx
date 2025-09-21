@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ThreeAnimation from '@/components/ThreeAnimation';
+import NoteTaking from '@/components/NoteTaking';
 
 interface Lesson {
   id: string;
@@ -235,26 +237,38 @@ export default function Lesson() {
           </CardContent>
         </Card>
 
-        {/* Interactive Elements Placeholder */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-lg">Practice Exercise</CardTitle>
-            <CardDescription>
-              Apply what you've learned with this interactive exercise
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-muted/30 border-2 border-dashed border-muted rounded-lg p-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                Interactive 3D animations and exercises will be added here
-              </p>
-              <div className="w-full bg-muted rounded-full h-2 mb-4">
-                <div className="bg-primary h-2 rounded-full" style={{ width: '100%' }}></div>
-              </div>
-              <p className="text-sm text-success font-medium">Exercise Complete! 🎉</p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Interactive Elements and Note Taking */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* 3D Animation */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Interactive 3D Visualization</CardTitle>
+              <CardDescription>
+                Explore the concepts with interactive 3D animations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <ThreeAnimation concept="atom" width={350} height={250} />
+            </CardContent>
+          </Card>
+
+          {/* Note Taking */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Take Notes</CardTitle>
+              <CardDescription>
+                Capture important points and insights
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <NoteTaking 
+                lessonId={lesson.id}
+                courseId={lesson.course_id}
+                lessonTitle={lesson.title}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Lesson Navigation */}
         <Card>
