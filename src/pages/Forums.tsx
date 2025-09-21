@@ -16,15 +16,18 @@ interface Forum {
   description: string;
   category: string;
   created_at: string;
+  created_by: string;
   posts: { count: number }[];
-  profiles: { full_name: string };
+  profiles?: { full_name: string };
 }
 
 interface RecentPost {
   id: string;
   content: string;
   created_at: string;
+  user_id: string;
   forums: { title: string };
+  profiles?: { full_name: string };
 }
 
 export default function Forums() {

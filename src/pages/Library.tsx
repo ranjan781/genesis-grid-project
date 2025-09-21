@@ -26,7 +26,7 @@ interface Resource {
   tags: string[];
   download_count: number;
   created_at: string;
-  profiles: { full_name: string };
+  created_by: string;
 }
 
 export default function Library() {
@@ -286,7 +286,7 @@ export default function Library() {
                         </div>
                         <div className="flex items-center">
                           <Users className="h-4 w-4 mr-1" />
-                          {resource.profiles?.full_name || 'Unknown'}
+                          Created by User
                         </div>
                       </div>
                       <div className="flex items-center">
