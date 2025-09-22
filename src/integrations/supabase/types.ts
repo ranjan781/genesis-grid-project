@@ -189,6 +189,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          resource_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          resource_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          resource_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       class_enrollments: {
         Row: {
           class_id: string
@@ -614,6 +635,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ratings: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          resource_id: string
+          review: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          resource_id: string
+          review?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          resource_id?: string
+          review?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       resources: {
         Row: {

@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import VirtualWhiteboard from '@/components/VirtualWhiteboard';
 import {
   Video, Calendar, Clock, Users, Plus,
   Play, Square, Mic, MicOff, Camera,
   CameraOff, Monitor, MessageCircle, 
-  Settings, Link as LinkIcon, Edit, Trash2
+  Settings, Link as LinkIcon, Edit, Trash2,
+  PenTool, FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -67,6 +69,7 @@ export default function VirtualClassroom() {
   const [isMuted, setIsMuted] = useState(true);
   const [isCameraOff, setIsCameraOff] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [meetingTab, setMeetingTab] = useState<'video' | 'whiteboard' | 'materials'>('video');
 
   useEffect(() => {
     fetchSessions();
@@ -403,18 +406,136 @@ export default function VirtualClassroom() {
       {/* Virtual Meeting Interface */}
       {isInMeeting && (
         <div className="fixed inset-0 bg-black z-50 flex flex-col">
-          {/* Video Area */}
-          <div className="flex-1 relative bg-gray-900">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-gray-800 rounded-lg p-8 text-white text-center">
-                <Camera className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Camera is turned off</p>
-                <p className="text-sm opacity-75">Click the camera button to turn it on</p>
+          {/* Meeting Header */}
+          <div className="bg-gray-800 px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <h2 className="text-white font-semibold">Virtual Classroom</h2>
+              <div className="flex space-x-2">
+                <Button
+                  variant={meetingTab === 'video' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setMeetingTab('video')}
+                  className="text-white"
+                >
+                  <Video className="h-4 w-4 mr-2" />
+                  Video
+                </Button>
+                <Button
+                  variant={meetingTab === 'whiteboard' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setMeetingTab('whiteboard')}
+                  className="text-white"
+                >
+                  <PenTool className="h-4 w-4 mr-2" />
+                  Whiteboard
+                </Button>
+                <Button
+                  variant={meetingTab === 'materials' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setMeetingTab('materials')}
+                  className="text-white"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Materials
+                </Button>
               </div>
             </div>
-            
-            {/* Meeting Controls */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-gray-800 rounded-full px-6 py-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={leaveSession}
+              className="text-white"
+            >
+              <Square className="h-4 w-4 mr-2" />
+              Leave
+            </Button>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex">
+            {/* Content Area */}
+            <div className="flex-1 relative">
+              {meetingTab === 'video' && (
+                <div className="h-full bg-gray-900 flex items-center justify-center">
+                  <div className="bg-gray-800 rounded-lg p-8 text-white text-center">
+                    <Camera className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">Camera is turned off</p>
+                    <p className="text-sm opacity-75">Click the camera button to turn it on</p>
+                  </div>
+                </div>
+              )}
+              
+              {meetingTab === 'whiteboard' && (
+                <div className="h-full p-4 bg-white">
+                  <VirtualWhiteboard 
+                    width={Math.min(window.innerWidth - 100, 1200)} 
+                    height={Math.min(window.innerHeight - 200, 600)}
+                    sessionId="live-meeting"
+                  />
+                </div>
+              )}
+              
+              {meetingTab === 'materials' && (
+                <div className="h-full p-6 bg-white overflow-y-auto">
+                  <h3 className="text-lg font-semibold mb-4">Session Materials</h3>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Lesson Plan.pdf', type: 'PDF', size: '2.3 MB' },
+                      { name: 'Practice Exercises.docx', type: 'Document', size: '1.8 MB' },
+                      { name: 'Reference Material.pptx', type: 'Presentation', size: '4.1 MB' },
+                    ].map((material, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="font-medium">{material.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {material.type} • {material.size}
+                            </p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Open
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Chat Sidebar */}
+            <div className="w-80 bg-white border-l flex flex-col">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold flex items-center">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Chat
+                </h3>
+              </div>
+              <div className="flex-1 p-4 overflow-y-auto">
+                <div className="space-y-3">
+                  <div className="text-sm">
+                    <span className="font-medium text-primary">Teacher:</span>
+                    <p className="text-muted-foreground mt-1">Welcome to the virtual classroom!</p>
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium text-secondary">Student 1:</span>
+                    <p className="text-muted-foreground mt-1">Thank you for the session.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 border-t">
+                <div className="flex space-x-2">
+                  <Input placeholder="Type a message..." className="flex-1" />
+                  <Button size="sm">Send</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Meeting Controls */}
+          <div className="bg-gray-800 px-6 py-3 flex items-center justify-center">
+            <div className="flex items-center gap-4">
               <Button
                 size="lg"
                 variant={isMuted ? "secondary" : "default"}
@@ -447,16 +568,7 @@ export default function VirtualClassroom() {
                 variant="secondary"
                 className="rounded-full"
               >
-                <MessageCircle className="h-5 w-5" />
-              </Button>
-              
-              <Button
-                size="lg"
-                variant="destructive"
-                onClick={leaveSession}
-                className="rounded-full"
-              >
-                <Square className="h-5 w-5" />
+                <Settings className="h-5 w-5" />
               </Button>
             </div>
           </div>

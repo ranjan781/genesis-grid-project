@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ThreeAnimation from '@/components/ThreeAnimation';
 import NoteTaking from '@/components/NoteTaking';
+import AudioNarration from '@/components/AudioNarration';
 
 interface Lesson {
   id: string;
@@ -236,6 +237,15 @@ export default function Lesson() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Audio Narration */}
+        <div className="mb-8">
+          <AudioNarration 
+            text={lesson.content}
+            lessonId={lesson.id}
+            autoPlay={false}
+          />
+        </div>
 
         {/* Interactive Elements and Note Taking */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">

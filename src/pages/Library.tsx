@@ -27,6 +27,9 @@ interface Resource {
   download_count: number;
   created_at: string;
   created_by: string;
+  rating?: number;
+  rating_count?: number;
+  is_bookmarked?: boolean;
 }
 
 export default function Library() {
@@ -38,10 +41,14 @@ export default function Library() {
   const [selectedType, setSelectedType] = useState('all');
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [bookmarkedResources, setBookmarkedResources] = useState<string[]>([]);
 
   useEffect(() => {
     fetchResources();
-  }, []);
+    if (user) {
+      fetchBookmarks();
+    }
+  }, [user]);
 
   useEffect(() => {
     filterResources();
@@ -49,13 +56,32 @@ export default function Library() {
 
   const fetchResources = async () => {
     try {
-      const { data } = await supabase
+      // Fetch resources with ratings
+      const { data: resourcesData } = await supabase
         .from('resources')
-        .select('*')
+        .select(`
+          *,
+          ratings(rating)
+        `)
         .eq('is_public', true)
         .order('created_at', { ascending: false });
 
-      setResources(data || []);
+      // Calculate average ratings
+      const resourcesWithRatings = resourcesData?.map(resource => {
+        const ratings = Array.isArray(resource.ratings) ? resource.ratings : [];
+        const avgRating = ratings.length > 0 
+          ? ratings.reduce((sum: number, r: any) => sum + r.rating, 0) / ratings.length 
+          : 0;
+        
+        return {
+          ...resource,
+          rating: Number(avgRating.toFixed(1)),
+          rating_count: ratings.length,
+          ratings: undefined // Remove the nested ratings
+        };
+      }) || [];
+
+      setResources(resourcesWithRatings);
     } catch (error) {
       console.error('Error fetching resources:', error);
       toast({
@@ -65,6 +91,21 @@ export default function Library() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBookmarks = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('bookmarks')
+        .select('resource_id')
+        .eq('user_id', user.id);
+      
+      setBookmarkedResources(data?.map(b => b.resource_id) || []);
+    } catch (error) {
+      console.error('Error fetching bookmarks:', error);
     }
   };
 
@@ -135,6 +176,72 @@ export default function Library() {
         variant: "destructive"
       });
     }
+  };
+
+  const toggleBookmark = async (resourceId: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to bookmark resources",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const isBookmarked = bookmarkedResources.includes(resourceId);
+      
+      if (isBookmarked) {
+        // Remove bookmark
+        await supabase
+          .from('bookmarks')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('resource_id', resourceId);
+        
+        setBookmarkedResources(prev => prev.filter(id => id !== resourceId));
+        toast({
+          title: "Bookmark removed",
+          description: "Resource removed from your bookmarks",
+        });
+      } else {
+        // Add bookmark
+        await supabase
+          .from('bookmarks')
+          .insert({
+            user_id: user.id,
+            resource_id: resourceId
+          });
+        
+        setBookmarkedResources(prev => [...prev, resourceId]);
+        toast({
+          title: "Resource bookmarked",
+          description: "Resource added to your bookmarks",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      toast({
+        title: "Error updating bookmark",
+        description: "Failed to update bookmark. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const renderStars = (rating: number, size = 'sm') => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Star
+          key={i}
+          className={`${size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'} ${
+            i <= rating ? 'text-accent fill-accent' : 'text-muted-foreground'
+          }`}
+        />
+      );
+    }
+    return stars;
   };
 
   const uniqueSubjects = [...new Set(resources.map(r => r.subject).filter(Boolean))];
@@ -250,8 +357,17 @@ export default function Library() {
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <Bookmark className="h-4 w-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => toggleBookmark(resource.id)}
+                        className={bookmarkedResources.includes(resource.id) ? 'text-accent' : ''}
+                      >
+                        <Bookmark 
+                          className={`h-4 w-4 ${
+                            bookmarkedResources.includes(resource.id) ? 'fill-current' : ''
+                          }`} 
+                        />
                       </Button>
                     </div>
                   </CardHeader>
@@ -259,6 +375,18 @@ export default function Library() {
                     <CardDescription className="line-clamp-3 mb-4">
                       {resource.description}
                     </CardDescription>
+
+                    {/* Rating */}
+                    {resource.rating && resource.rating > 0 && (
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="flex items-center">
+                          {renderStars(resource.rating)}
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {resource.rating} ({resource.rating_count} review{resource.rating_count !== 1 ? 's' : ''})
+                        </span>
+                      </div>
+                    )}
                     
                     {/* Tags */}
                     {resource.tags && resource.tags.length > 0 && (
@@ -355,13 +483,77 @@ export default function Library() {
           </TabsContent>
 
           <TabsContent value="bookmarked">
-            <div className="text-center py-12">
-              <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">My Bookmarks</h3>
-              <p className="text-muted-foreground">
-                This section will show your saved and bookmarked resources.
-              </p>
-            </div>
+            {bookmarkedResources.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredResources
+                  .filter(resource => bookmarkedResources.includes(resource.id))
+                  .map((resource) => (
+                    <Card key={resource.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            {getResourceIcon(resource.resource_type)}
+                            <div className="flex-1">
+                              <CardTitle className="text-lg line-clamp-2">{resource.title}</CardTitle>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Badge variant="outline" className="text-xs">
+                                  {resource.resource_type}
+                                </Badge>
+                                {resource.subject && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {resource.subject}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => toggleBookmark(resource.id)}
+                            className="text-accent"
+                          >
+                            <Bookmark className="h-4 w-4 fill-current" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription className="line-clamp-3 mb-4">
+                          {resource.description}
+                        </CardDescription>
+
+                        {/* Rating */}
+                        {resource.rating && resource.rating > 0 && (
+                          <div className="flex items-center space-x-2 mb-3">
+                            <div className="flex items-center">
+                              {renderStars(resource.rating)}
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {resource.rating}
+                            </span>
+                          </div>
+                        )}
+                        
+                        <Button 
+                          onClick={() => handleDownload(resource)}
+                          className="w-full"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          {resource.resource_type === 'link' ? 'Visit' : 'Download'}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Bookmarks Yet</h3>
+                <p className="text-muted-foreground">
+                  Start bookmarking resources to see them here.
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
