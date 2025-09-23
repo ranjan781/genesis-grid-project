@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Trophy, Target, Users, LogOut } from 'lucide-react';
+import { BookOpen, Trophy, Target, Users, LogOut, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import GameMascot from '@/components/GameMascot';
 
 interface Profile {
   id: string;
@@ -35,6 +36,7 @@ export default function Dashboard() {
     badges: []
   });
   const [loading, setLoading] = useState(true);
+  const [showMascot, setShowMascot] = useState(true);
 
   useEffect(() => {
     fetchProfile();
@@ -156,6 +158,15 @@ export default function Dashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Mascot */}
+        {showMascot && (
+          <div className="mb-6">
+            <GameMascot 
+              type="welcome" 
+              onClose={() => setShowMascot(false)}
+            />
+          </div>
+        )}
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
@@ -227,45 +238,115 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Continue Learning</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  Continue Learning
+                  <Badge variant="secondary">
+                    {stats.coursesInProgress} active
+                  </Badge>
+                </CardTitle>
                 <CardDescription>Pick up where you left off</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <BookOpen className="h-6 w-6 text-primary" />
+                <Link to="/course/1/lesson/2">
+                  <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/5 transition-colors cursor-pointer">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <BookOpen className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Introduction to Mathematics</h3>
+                        <p className="text-sm text-muted-foreground">Lesson 2: Multiplication and Division</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant="outline" className="text-xs">Math</Badge>
+                          <span className="text-xs text-muted-foreground">• 15 min remaining</span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold">Introduction to Mathematics</h3>
-                      <p className="text-sm text-muted-foreground">Lesson 2: Multiplication and Division</p>
+                    <div className="text-right">
+                      <Progress value={40} className="w-20 mb-2" />
+                      <p className="text-xs text-muted-foreground">40% complete</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Progress value={40} className="w-20 mb-2" />
-                    <p className="text-xs text-muted-foreground">40% complete</p>
+                </Link>
+                
+                <Link to="/course/2/lesson/1">
+                  <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/5 transition-colors cursor-pointer">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                        <BookOpen className="h-6 w-6 text-secondary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Basic Science Concepts</h3>
+                        <p className="text-sm text-muted-foreground">Lesson 1: Introduction to Physics</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant="outline" className="text-xs">Science</Badge>
+                          <span className="text-xs text-muted-foreground">• Just started</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Progress value={5} className="w-20 mb-2" />
+                      <p className="text-xs text-muted-foreground">5% complete</p>
+                    </div>
                   </div>
+                </Link>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                  <Link to="/courses">
+                    <Button className="w-full" variant="outline">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Browse All Courses
+                    </Button>
+                  </Link>
+                  <Link to="/virtual-classroom">
+                    <Button className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Join Live Session
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Daily Goals */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Target className="h-5 w-5 mr-2" />
+                  Today's Goals
+                </CardTitle>
+                <CardDescription>Complete these to maintain your streak</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-success/5 rounded-lg border border-success/20">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-success rounded-full flex items-center justify-center">
+                      <span className="text-xs text-white">✓</span>
+                    </div>
+                    <span className="text-sm">Complete 1 lesson</span>
+                  </div>
+                  <Badge variant="secondary" className="text-success">Completed</Badge>
                 </div>
                 
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
-                      <BookOpen className="h-6 w-6 text-secondary" />
+                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-muted rounded-full flex items-center justify-center">
+                      <span className="text-xs">○</span>
                     </div>
-                    <div>
-                      <h3 className="font-semibold">Basic Science Concepts</h3>
-                      <p className="text-sm text-muted-foreground">Just started</p>
-                    </div>
+                    <span className="text-sm">Practice quiz (2/3 remaining)</span>
                   </div>
-                  <div className="text-right">
-                    <Progress value={5} className="w-20 mb-2" />
-                    <p className="text-xs text-muted-foreground">5% complete</p>
-                  </div>
+                  <Progress value={33} className="w-16" />
                 </div>
-
-                <div className="pt-4">
-                  <Link to="/courses">
-                    <Button className="w-full">Explore All Courses</Button>
+                
+                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-muted rounded-full flex items-center justify-center">
+                      <span className="text-xs">○</span>
+                    </div>
+                    <span className="text-sm">Forum participation</span>
+                  </div>
+                  <Link to="/forums">
+                    <Button size="sm" variant="outline">Go</Button>
                   </Link>
                 </div>
               </CardContent>
@@ -274,33 +355,62 @@ export default function Dashboard() {
 
           {/* Achievements & Navigation */}
           <div className="space-y-6">
+            {/* Streak & Level Info */}
+            <Card className="bg-gradient-to-r from-secondary/10 to-accent/10">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-secondary mb-2">{stats.currentStreak}</div>
+                  <p className="text-sm text-muted-foreground mb-4">Day Learning Streak 🔥</p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Level Progress</span>
+                      <span>Level {Math.floor(stats.totalPoints / 1000) + 1}</span>
+                    </div>
+                    <Progress value={((stats.totalPoints % 1000) / 1000) * 100} />
+                    <p className="text-xs text-muted-foreground">
+                      {1000 - (stats.totalPoints % 1000)} points to next level
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Recent Badges */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Achievements</CardTitle>
-                <CardDescription>Your latest badges</CardDescription>
+                <CardTitle className="flex items-center justify-between">
+                  Recent Achievements
+                  <Link to="/profile">
+                    <Button variant="outline" size="sm">View All</Button>
+                  </Link>
+                </CardTitle>
+                <CardDescription>Your latest badges and accomplishments</CardDescription>
               </CardHeader>
               <CardContent>
                 {stats.badges.length > 0 ? (
                   <div className="space-y-3">
                     {stats.badges.slice(0, 3).map((userBadge) => (
-                      <div key={userBadge.badge_id} className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
-                          <Trophy className="h-4 w-4 text-accent" />
+                      <div key={userBadge.badge_id} className="flex items-center space-x-3 p-2 bg-accent/5 rounded-lg">
+                        <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+                          <Trophy className="h-5 w-5 text-accent" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium text-sm">{userBadge.badges.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(userBadge.earned_at).toLocaleDateString()}
+                            +{userBadge.badges.points_value} points • {new Date(userBadge.earned_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-sm">
-                    Complete lessons to earn your first badge!
-                  </p>
+                  <div className="text-center py-4">
+                    <Trophy className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-muted-foreground text-sm">
+                      Complete lessons to earn your first badge!
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -320,12 +430,24 @@ export default function Dashboard() {
                 <Link to="/leaderboard">
                   <Button variant="outline" className="w-full justify-start">
                     <Trophy className="h-4 w-4 mr-2" />
-                    Leaderboard
+                    View Leaderboard
+                  </Button>
+                </Link>
+                <Link to="/library">
+                  <Button variant="outline" className="w-full justify-start">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Study Library
+                  </Button>
+                </Link>
+                <Link to="/forums">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Users className="h-4 w-4 mr-2" />
+                    Join Discussions
                   </Button>
                 </Link>
                 <Link to="/profile">
                   <Button variant="outline" className="w-full justify-start">
-                    <Users className="h-4 w-4 mr-2" />
+                    <User className="h-4 w-4 mr-2" />
                     My Profile
                   </Button>
                 </Link>
